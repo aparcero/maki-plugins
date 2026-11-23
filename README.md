@@ -8,7 +8,7 @@ documentation in this repository.
 | --- | --- |
 | [Herdr](docs/plugins/herdr.md) | Report agent status to Herdr, discover peers, exchange messages, and start or close agents |
 | [ast-grep](docs/plugins/ast-grep.md) | Search, preview/apply structural rewrites, and inspect syntax trees |
-| [zai-local](docs/plugins/zai-local.md) | Z.ai Coding Plan provider alias with GLM-5.3's supported reasoning levels |
+| [zai-local](docs/plugins/zai-local.md) | Use GLM-5.3 and GLM-5.4 with Z.ai Coding Plan reasoning levels |
 
 ## Install
 

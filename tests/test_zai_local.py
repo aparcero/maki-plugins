@@ -2,6 +2,7 @@
 
 import json
 import os
+from itertools import product
 from pathlib import Path
 import shutil
 import subprocess
@@ -64,17 +65,17 @@ class ZaiLocalTests(unittest.TestCase):
                     '[zai-local]\n'
                     f'base_url = "http://127.0.0.1:{server.server_port}/api/coding/paas/v4"\n'
                 )
-                for effort, expected in ((None, "low"), ("adaptive", "max"),
-                                         ("low", "low"), ("high", "high"),
-                                         ("max", "max"), (False, "low")):
-                    with self.subTest(effort=effort):
+                efforts = ((None, "low"), ("adaptive", "max"), ("low", "low"),
+                           ("high", "high"), ("max", "max"), (False, "low"))
+                for model, (effort, expected) in product(("glm-5.3", "glm-5.4"), efforts):
+                    with self.subTest(model=model, effort=effort):
                         setup = "" if effort is None else (
                             "maki.setup({ always_thinking = " + json.dumps(effort) + " })\n"
                         )
                         (config / "init.lua").write_text(setup)
                         before = len(requests)
                         result = subprocess.run(
-                            ["maki", "-p", "--model", "zai-local/glm-5.3", "--max-turns", "1", "Say OK."],
+                            ["maki", "-p", "--model", f"zai-local/{model}", "--max-turns", "1", "Say OK."],
                             cwd=root, env=env, capture_output=True, text=True, timeout=60,
                         )
                         self.assertEqual(result.returncode, 0, result.stderr + result.stdout[-2000:])
@@ -82,7 +83,7 @@ class ZaiLocalTests(unittest.TestCase):
                         path, authorization, body = requests[-1]
                         self.assertEqual(path, "/api/coding/paas/v4/chat/completions")
                         self.assertEqual(authorization, "Bearer local-test-placeholder")
-                        self.assertEqual(body["model"], "glm-5.3")
+                        self.assertEqual(body["model"], model)
                         self.assertEqual(body["reasoning_effort"], expected)
                         self.assertEqual(body["thinking"], {"type": "enabled"})
             finally:
